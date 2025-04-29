@@ -42,7 +42,7 @@ if uploaded_file is not None:
                 value=1,
                 help="Enter the starting page number",
                 key="start_page"
-            )+26
+            )+25
         
         with col2:
             end_page = st.number_input(
@@ -52,7 +52,7 @@ if uploaded_file is not None:
                 value=total_pages,
                 help="Enter the ending page number",
                 key="end_page"
-            )+26
+            )+25
         
         st.write(start_page, end_page)
         # Validate page range
@@ -112,12 +112,12 @@ if uploaded_file is not None:
                     part = part.strip()
                     if '-' in part:
                         start, end = map(int, part.split('-'))
-                        page_numbers.update(range(start + 26, end + 27))  # Add 26 to both start and end
+                        page_numbers.update(range(start + 25, end + 26))  # Add 25 to both start and end
                     else:
-                        page_numbers.add(int(part) + 26)  # Add 26 to single page numbers
+                        page_numbers.add(int(part) + 25)  # Add 25 to single page numbers
                 
                 # Validate page numbers
-                invalid_pages = [p for p in page_numbers if p < 1 or p > total_pages + 26]  # Adjust validation range
+                invalid_pages = [p for p in page_numbers if p < 1 or p > total_pages + 25]  # Adjust validation range
                 if invalid_pages:
                     st.error(f"Invalid page numbers: {invalid_pages}")
                 else:
