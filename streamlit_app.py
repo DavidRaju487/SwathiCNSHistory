@@ -42,7 +42,8 @@ if uploaded_file is not None:
                 value=1,
                 help="Enter the starting page number",
                 key="start_page"
-            )+25
+            )
+            start_page = start_page + 3 if start_page > 1500 else start_page + 25
         
         with col2:
             end_page = st.number_input(
@@ -52,7 +53,8 @@ if uploaded_file is not None:
                 value=total_pages,
                 help="Enter the ending page number",
                 key="end_page"
-            )+25
+            )
+            end_page = end_page + 3 if end_page > 1500 else end_page + 25
         
         st.write(start_page, end_page)
         # Validate page range
@@ -112,12 +114,20 @@ if uploaded_file is not None:
                     part = part.strip()
                     if '-' in part:
                         start, end = map(int, part.split('-'))
-                        page_numbers.update(range(start + 25, end + 26))  # Add 25 to both start and end
+                        if start > 1500:
+                            page_numbers.update(range(start + 3, end + 4))  # Add 3 to both start and end
+                        else:
+                            page_numbers.update(range(start + 25, end + 26))  # Add 25 to both start and end
                     else:
-                        page_numbers.add(int(part) + 25)  # Add 25 to single page numbers
+                        page_num = int(part)
+                        if page_num > 1500:
+                            page_numbers.add(page_num + 3)  # Add 3 to page number
+                        else:
+                            page_numbers.add(page_num + 25)  # Add 25 to page number
                 
                 # Validate page numbers
-                invalid_pages = [p for p in page_numbers if p < 1 or p > total_pages + 25]  # Adjust validation range
+                max_page = max(total_pages + 25, 1500 + 3)  # Adjust validation range for both cases
+                invalid_pages = [p for p in page_numbers if p < 1 or p > max_page]
                 if invalid_pages:
                     st.error(f"Invalid page numbers: {invalid_pages}")
                 else:
