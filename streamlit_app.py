@@ -72,10 +72,18 @@ if uploaded_file is not None:
                         pdf_reader = PyPDF2.PdfReader(uploaded_file)
                         pdf_writer = PyPDF2.PdfWriter()
                         
-                        # Add the specified pages to the writer
-                        for page_num in range(start_page - 1, end_page):
-                            page = pdf_reader.pages[page_num]
-                            pdf_writer.add_page(page)
+                        # Calculate actual page numbers to extract
+                        actual_start = start_page - 25 if start_page <= 1500 + 25 else start_page - 3
+                        actual_end = end_page - 25 if end_page <= 1500 + 25 else end_page - 3
+                        
+                        # Validate actual page numbers
+                        if actual_start < 0 or actual_end >= len(pdf_reader.pages):
+                            st.error("Invalid page range! Please check the page numbers.")
+                        else:
+                            # Add the specified pages to the writer
+                            for page_num in range(actual_start, actual_end + 1):
+                                page = pdf_reader.pages[page_num]
+                                pdf_writer.add_page(page)
                         
                         # Write to the temporary file
                         pdf_writer.write(tmp_file)
@@ -125,11 +133,17 @@ if uploaded_file is not None:
                         else:
                             page_numbers.add(page_num + 25)  # Add 25 to page number
                 
-                # Validate page numbers
-                max_page = max(total_pages + 25, 1500 + 3)  # Adjust validation range for both cases
-                invalid_pages = [p for p in page_numbers if p < 1 or p > max_page]
-                if invalid_pages:
-                    st.error(f"Invalid page numbers: {invalid_pages}")
+                # Calculate actual page numbers to extract
+                actual_page_numbers = set()
+                for page in page_numbers:
+                    actual_page = page - 25 if page <= 1500 + 25 else page - 3
+                    if 0 <= actual_page < len(pdf_reader.pages):
+                        actual_page_numbers.add(actual_page)
+                    else:
+                        st.error(f"Invalid page number: {page}")
+                
+                if not actual_page_numbers:
+                    st.error("No valid pages to extract!")
                 else:
                     # Create a temporary file for the output
                     with NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
@@ -141,8 +155,8 @@ if uploaded_file is not None:
                         pdf_writer = PyPDF2.PdfWriter()
                         
                         # Add the specified pages to the writer
-                        for page_num in sorted(page_numbers):
-                            page = pdf_reader.pages[page_num - 1]  # Convert to 0-based index
+                        for page_num in sorted(actual_page_numbers):
+                            page = pdf_reader.pages[page_num]
                             pdf_writer.add_page(page)
                         
                         # Write to the temporary file
@@ -160,7 +174,7 @@ if uploaded_file is not None:
                         
                     # Clean up the temporary file
                     os.unlink(tmp_file_path)
-                
+            
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
 else:
